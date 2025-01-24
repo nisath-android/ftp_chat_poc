@@ -41,13 +41,14 @@ android {
 }
 
 dependencies {
-    implementation("commons-net:commons-net:3.11.1")
+   // implementation("commons-net:commons-net:3.11.1")
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
-    implementation(project(":ftpclient"))
+   implementation(project(":ftpclient"))
+  //  implementation ("com.github.nisath-android:ftp-library:1.0.3")
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
