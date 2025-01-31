@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <TextView
+        android:id="@+id/registration_status"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
+    <LinearLayout
+        android:id="@+id/register_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/registration_status"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <EditText
+            android:id="@+id/username"
+            android:hint="Username"
+            android:text="7845470737"
+            android:inputType="textEmailAddress"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <EditText
+            android:id="@+id/password"
+            android:hint="Password"
+            android:text="7845470737"
+            android:inputType="text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <EditText
+            android:id="@+id/domain"
+            android:hint="Domain"
+            android:text="192.168.1.32"
+            android:inputType="textUri"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <RadioGroup
+            android:id="@+id/transport"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <RadioButton
+                android:id="@+id/udp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="UDP" />
+
+            <RadioButton
+                android:id="@+id/tcp"
+                android:checked="true"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="TCP" />
+
+            <RadioButton
+                android:id="@+id/tls"
+                android:checked="false"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="TLS" />
+
+        </RadioGroup>
+
+        <Button
+            android:id="@+id/connect"
+            android:text="Connect"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+    </LinearLayout>
+
+    <RelativeLayout
+        android:id="@+id/chat_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/registration_status"
+        android:visibility="gone">
+
+        <EditText
+            android:id="@+id/remote_address"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:text="sip:7845470737@192.168.1.32"
+            android:hint="Remote SIP address"/>
+
+        <Button
+            android:id="@+id/send_message"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Send message"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentBottom="true"/>
+
+        <ImageView
+            android:id="@+id/send_image"
+            android:src="@android:drawable/ic_menu_upload"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignTop="@id/send_message"
+            android:layout_alignParentBottom="true"/>
+
+        <EditText
+            android:id="@+id/message"
+            android:text="Test"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_toLeftOf="@id/send_message"
+            android:layout_toRightOf="@id/send_image"
+            android:layout_alignParentBottom="true"
+            android:hint="Message to send"/>
+
+        <ScrollView
+            android:id="@+id/scroll"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#A1A1A1"
+            android:fillViewport="true"
+            android:layout_above="@id/message"
+            android:layout_below="@id/remote_address">
+
+            <LinearLayout
+                android:id="@+id/messages"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"/>
+
+        </ScrollView>
+
+    </RelativeLayout>
+
+</RelativeLayout>

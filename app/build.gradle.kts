@@ -1,7 +1,7 @@
 plugins {
-  alias(libs.plugins.android.application)
-  //  id("com.android.library")
+    alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    id("maven-publish")
 }
 
 android {
@@ -27,6 +27,7 @@ android {
             )
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
@@ -34,21 +35,22 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
     }
+
     buildFeatures {
         buildConfig = true
         viewBinding = true
     }
 }
 
+
 dependencies {
-   // implementation("commons-net:commons-net:3.11.1")
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
-   implementation(project(":ftpclient"))
-  //  implementation ("com.github.nisath-android:ftp-library:1.0.3")
+    implementation("com.github.nisath-android:ftp-library:1.0.9")
+    implementation("org.linphone:linphone-sdk-android:5.3.101")
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

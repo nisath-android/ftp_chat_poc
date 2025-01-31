@@ -21,7 +21,7 @@
             android:id="@+id/edtServer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="192.168.1.0"
+            android:text="192.168.1.167"
             android:hint="FTP Server"
             android:inputType="text"/>
 
@@ -37,7 +37,7 @@
             android:id="@+id/edtPassword"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="root"
+            android:text="ivrs@123"
             android:hint="Password"
             android:inputType="text"/>
 
@@ -45,28 +45,9 @@
             android:id="@+id/btnSelectFile"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Select File"
+            android:text="Login"
             android:enabled="true"/>
 
-        <Button
-            android:id="@+id/btnUpload"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Upload File"
-            android:enabled="false"/>
-        <Button
-            android:id="@+id/btnDownload"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Refresh file"
-            android:visibility="visible"
-            android:enabled="true"
-           />
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recyclerView"
-            android:layout_marginTop="8dp"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -9,6 +9,11 @@ pluginManagement {
         }
         mavenCentral()
         gradlePluginPortal()
+        // We need to declare this repository to be able to use Liblinphone SDK
+            maven {
+                url = uri("https://linphone.org/maven_repository")
+            }
+
     }
 }
 dependencyResolutionManagement {
@@ -17,9 +22,14 @@ dependencyResolutionManagement {
         google()
         mavenCentral()
         maven( url = "https://jitpack.io" )
+        // We need to declare this repository to be able to use Liblinphone SDK
+            maven {
+                url = uri("https://linphone.org/maven_repository")
+            }
+
     }
 }
 
 rootProject.name = "FTPClient"
 include(":app")
-include(":ftpclient")
+//include(":ftpclient")
