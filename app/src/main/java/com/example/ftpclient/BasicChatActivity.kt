@@ -30,6 +30,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.Gravity
 import android.view.View
+import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
@@ -38,9 +39,12 @@ import android.widget.RadioGroup
 import android.widget.RelativeLayout
 import android.widget.ScrollView
 import android.widget.TextView
+import android.widget.VideoView
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.net.toFile
+import androidx.core.net.toUri
 import androidx.lifecycle.lifecycleScope
 import com.example.ftpclient.databinding.BasicChatActivityBinding
 import com.google.android.material.snackbar.Snackbar
@@ -375,7 +379,13 @@ class BasicChatActivity : AppCompatActivity() {
         uploadFileToFTP()
 
     }
-
+fun getFilenameFromFTPUrl(ftpUrl: String): String {
+    val parts = ftpUrl.split("/")
+    /*if(parts.last().contains(".")){
+        return parts.last().substringBeforeLast(".")
+    }*/
+    return parts.last()
+}
     private fun sentTextMessages(ftpURL: String) {
 
         if (chatRoom == null) {
@@ -403,7 +413,7 @@ class BasicChatActivity : AppCompatActivity() {
                         // chatMessage!!,
                         ftpURL,
                         path,
-                        this.name ?: "",
+                        fileName = getFilenameFromFTPUrl(ftpURL),
                         FileUtils.getMimeType(File(path)),
                         this.extension!!,
                         stringBuilder
@@ -423,7 +433,7 @@ class BasicChatActivity : AppCompatActivity() {
                         //  chatMessage!!,
                         ftpURL,
                         path,
-                        this.name ?: "",
+                        fileName = getFilenameFromFTPUrl(ftpURL),
                         FileUtils.getMimeType(File(path)),
                         this.extension!!,
                         stringBuilder
@@ -473,9 +483,10 @@ class BasicChatActivity : AppCompatActivity() {
                                 getFilePath = { uri ->
                                     getFilePathFromUri(uri)
                                 }, getURL = {
-                                    Log.d(TAG, "uiInit: uploaded url is $it")
-                                    ftpURL = it
+
                                     runOnUiThread {
+                                        Log.d(TAG, "uiInit: uploaded url is $it")
+                                        ftpURL = it
                                         //binding?.message?.setText(it)
                                         sentTextMessages(ftpURL = it)
                                     }
@@ -616,7 +627,9 @@ class BasicChatActivity : AppCompatActivity() {
             when {
                 content.isText -> {
                     if (mode == false) {
+                        Log.d(TAG, "addMessageToHistory: Message Sender part")
                         if ((content.utf8Text == null || content.utf8Text!!.isEmpty()) && ftpURL.isNotEmpty()) {
+                            Log.d(TAG, "addMessageToHistory: only image chat")
                             //only image chat
                             addTextMessageToHistory(
                                 chatMessage,
@@ -630,22 +643,26 @@ class BasicChatActivity : AppCompatActivity() {
                                 content.utf8Text.toString().substringAfter("<-|->")
                             )
                         } else if (content.utf8Text!!.isNotEmpty() && ftpURL.isEmpty()) {
+                            Log.d(TAG, "addMessageToHistory: only text chat")
                             //only text chat
                             addTextMessageToHistory(chatMessage, content)
                         } else if (content.utf8Text!!.isNotEmpty() && ftpURL.isNotEmpty()) {
+                            Log.d(TAG, "addMessageToHistory: both text and image chat")
+                            Log.d(TAG, "addMessageToHistory: ftpURL= $ftpURL ,${content.utf8Text.toString().substringAfter("<-|->")}")
                             //both text and image chat
                             addTextMessageToHistory(chatMessage, content)
                             addDownloadButtonToHistory(chatMessage, content, ftpURL,content.utf8Text.toString().substringAfter("<-|->"))
                         } else {
                             //empty field
+                            Log.d(TAG, "addMessageToHistory: empty------")
                         }
                     } else {
-
+                        Log.d(TAG, "addMessageToHistory: Message Received part")
                         if (beforeText.isNotEmpty()) {
                             addTextMessageToHistory(chatMessage, content, beforeText)
                         }
                         if (afterText.isNotEmpty()) {
-                            ftpURL = "ftp://Admin:ivrs%40123@192.168.1.167/$afterText"
+                            ftpURL = "ftp://Admin:ivrs@123->192.168.1.167:21/$afterText"
                             addDownloadButtonToHistory(chatMessage, content, ftpURL, afterText)
                         }
 
@@ -818,10 +835,11 @@ class BasicChatActivity : AppCompatActivity() {
             buttonView.isEnabled = false
             // Set the path to where we want the file to be stored
             // Here we will use the app private storage
-            content.filePath = "${filePath}"
+            content.filePath = "${filePath}" //ftpURL = ftp://Admin:ivrs@123->192.168.1.167:21/image_1000004286.jpg
+            //ftpURL=ftp://Admin:ivrs@123->@192.168.1.167/image_1000004287.jpg
             Log.d(
                 TAG,
-                "addDownloadButtonToHistory: content.filePath=${content.filePath},filepath=$filePath content=${content.filePath}"
+                "addDownloadButtonToHistory: filepath=$filePath ftpURL=${ftpURL}"
             )
             lifecycleScope.launch(Dispatchers.IO) {
                 selectFiles.downloadFileViaFtpURL(
@@ -829,24 +847,84 @@ class BasicChatActivity : AppCompatActivity() {
                     selectFiles.getDownloadDirectoryPath(),
                     ftpUtil!!
                 ) { status, context, uri, mimetype ->
-                    Log.d(TAG, "addDownloadButtonToHistory: $uri")
+
+                    Log.d(TAG, "addDownloadButtonToHistory: after download = $uri,mimetype =$mimetype,subtype= ${content.subtype}")  //->  content://media/external/downloads/1000004287
+                   FileUtils.getFileInfo(this@BasicChatActivity,uri!!).apply{
+                       when(this.extension){
+                           "jpeg","jpg","png"->addImageView(uris = uri!!,button = buttonView)
+                           "mp4","avi","mov","mkv"->addVideoView(uris = uri!!)
+                           else->{
+                             ftpUtil.openFile(this@BasicChatActivity,uri!!,mimetype)
+                           }
+                       }
+                      // addImageView(uris = uri!!, button = buttonView)
+                       // addImageMessageToHistory(chatMessage, content, uri!!,) //path: uri!!.toFile().toPath().toString()
+                       //findViewById<ScrollView>(R.id.scroll).fullScroll(ScrollView.FOCUS_DOWN)
+                   }
 
                 }
             }
-            // Start the download
-            chatMessage.downloadContent(content)
 
-            // Download progress will be notified through onMsgStateChanged callback,
-            // so we need to add a listener if not done yet
-            if (!chatMessage.isOutgoing) {
-                chatMessage.addListener(chatMessageListener)
-            }
+
         }
 
         findViewById<LinearLayout>(R.id.messages).addView(buttonView)
         findViewById<ScrollView>(R.id.scroll).fullScroll(ScrollView.FOCUS_DOWN)
     }
 
+    private fun addImageView(file: File?=null,uris: Uri,button: Button) {
+     // Create an ImageView
+        runOnUiThread {        val imageView = ImageView(this).apply {
+            layoutParams = LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            )
+            setImageURI(uris) // Set the downloaded image
+            adjustViewBounds = true
+        }
+
+            // Add the ImageView to the LinearLayout
+            binding?.messages?.removeView(button)
+            binding?.messages?.addView(imageView)}
+
+    }
+
+    private fun addVideoView(file: File?=null,uris: Uri) {
+        // Create a VideoView
+       runOnUiThread { val videoView = VideoView(this).apply {
+           layoutParams = LinearLayout.LayoutParams(
+               ViewGroup.LayoutParams.MATCH_PARENT,
+               ViewGroup.LayoutParams.WRAP_CONTENT
+           )
+           //setVideoURI(file.toUri()) // Set the downloaded video
+           setVideoURI(uris) // Set the downloaded video
+       }
+
+           // Add the VideoView to the LinearLayout
+           binding?.messages?.addView(videoView)
+           // Start playing the video
+           videoView.start()
+       }
+
+    }
+
+    private fun addImageMessageToHistory(chatMessage: ChatMessage, content: Content,uris: Uri) {
+        val imageView = ImageView(this)
+        val layoutParams = LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.WRAP_CONTENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT
+        )
+        layoutParams.gravity = if (chatMessage.isOutgoing) Gravity.RIGHT else Gravity.LEFT
+        imageView.layoutParams = layoutParams
+
+        // As we downloaded the file to the content.filePath, we can now use it to display the image
+        imageView.setImageBitmap(BitmapFactory.decodeFile(uris!!.toFile().toPath().toString()))
+
+        chatMessage.userData = imageView
+
+        findViewById<LinearLayout>(R.id.messages).addView(imageView)
+        findViewById<ScrollView>(R.id.scroll).fullScroll(ScrollView.FOCUS_DOWN)
+    }
     private fun addImageMessageToHistory(chatMessage: ChatMessage, content: Content) {
         val imageView = ImageView(this)
         val layoutParams = LinearLayout.LayoutParams(
